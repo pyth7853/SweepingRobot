@@ -397,8 +397,13 @@ void RobotMove(){
     	while(!isDelayFinish){
     		isDelayFinish = DelayHanlder(2000,LSWING); 
     	} 
-		        
-        currDirection = LBSWING;                
+    	if(!isLastSecondCollide){
+        	currDirection = LBSWING;                       
+        
+    	}else{
+    		isLastSecondCollide = false;
+    	}		        
+        
       break;
       case RSWING:
         if(motorSpeed == 1){
@@ -414,8 +419,13 @@ void RobotMove(){
         } 
     	while(!isDelayFinish){
     		isDelayFinish = DelayHanlder(2000,RSWING); 
-    	}             
-    	currDirection = RBSWING;                    	
+    	} 
+    	if(!isLastSecondCollide){
+        	currDirection = RBSWING;                       
+        
+    	}else{
+    		isLastSecondCollide = false;
+    	}            
       break;      
       case LBSWING:
         if(motorSpeed == 1){
@@ -430,8 +440,13 @@ void RobotMove(){
         } 
     	while(!isDelayFinish){
     		isDelayFinish = DelayHanlder(2000,LBSWING); 
-    	}         
-		currDirection = RSWING;                    	
+    	}   
+    	if(!isLastSecondCollide){
+        	currDirection = RSWING;                       
+        
+    	}else{
+    		isLastSecondCollide = false;
+    	}                	                      	
       break;      
       case RBSWING:
         if(motorSpeed == 1){
@@ -446,7 +461,12 @@ void RobotMove(){
     	while(!isDelayFinish){
     		isDelayFinish = DelayHanlder(1500,RBSWING); 
     	} 
-    	currDirection = FF;                    	        
+    	if(!isLastSecondCollide){
+        	currDirection = FF;                       
+        
+    	}else{
+    		isLastSecondCollide = false;
+    	}                	      
       break;
       case STOP:
         myServoLeft.write(91);      
