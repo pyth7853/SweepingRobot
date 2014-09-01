@@ -60,16 +60,17 @@ void setup()
 int currDirection = FF;
 int motorSpeed = 3; //1 fast  2 mid  3 slow  
 int contCollision = 0;
+int ultraSonicThreshold = 4;
 void loop() 
 {  
     RobotMove(0);
-    if((obstacleDistance(1) < 10) || obstacleDistance(2) < 10  || obstacleDistance(3) < 10){   //　少加了(contCollision % 2 == 0 ) 為什麼會左左
+    if((obstacleDistance(1) < ultraSonicThreshold) || obstacleDistance(2) < ultraSonicThreshold  || obstacleDistance(3) < ultraSonicThreshold){   //　少加了(contCollision % 2 == 0 ) 為什麼會左左
         currDirection = BB;
         RobotMove(2000);
         currDirection = LL;
         contCollision++;            
         delay(10);
-    }else if((obstacleDistance(1) < 10) || obstacleDistance(2) < 10  || obstacleDistance(3) < 10
+    }else if((obstacleDistance(1) < ultraSonicThreshold) || obstacleDistance(2) < ultraSonicThreshold  || obstacleDistance(3) < ultraSonicThreshold
                                       && (contCollision % 2 == 1 ) && (contCollision != 0)){
         currDirection = BB;
         RobotMove(2000);
@@ -94,10 +95,9 @@ void loop()
 //    delay(15);                       // waits 15ms for the servo to reach the position 
 //  } 
 } 
-
+  int myServoLeftPos = 91;
+  int myServoRightPos = 90;
 void RobotMove(int delayTime){
-  int myServoLeftPos = 180;
-  int myServoRightPos = 180;
 
   switch(currDirection){
       case FF:
@@ -109,7 +109,31 @@ void RobotMove(int delayTime){
         }else if(motorSpeed == 3){
           myServoLeft.write(100);      
           myServoRight.write(82);        
-        }              
+          Serial.println("move front");         
+        }    
+        delay(3000);          
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+          myServoLeft.write(91);   //left swing   
+          myServoRight.write(80);        
+          Serial.println("left swing");          
+          delay(2000);
+          myServoLeft.write(91);      //left back swing   
+          myServoRight.write(100);              
+          Serial.println("left back swing");                    
+          delay(2000);
+          myServoLeft.write(100);    //right swing  
+          myServoRight.write(90);  
+          Serial.println("right swing");                    
+          delay(2000);                
+          myServoLeft.write(80);      //right back swing  
+          myServoRight.write(90);        
+          Serial.println("right back swing");                              
+          delay(1500);                   
+        }        
       break;
       case BB:
         if(motorSpeed == 1){
@@ -118,8 +142,8 @@ void RobotMove(int delayTime){
         }else if(motorSpeed == 2){
 
         }else if(motorSpeed == 3){
-          myServoLeft.write(80);      
-          myServoRight.write(100);        
+       //   myServoLeft.write(80);      
+       //   myServoRight.write(100);        
         }                    
         break;
       case RR:              
