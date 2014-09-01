@@ -21,7 +21,11 @@
 #define BL 6
 #define LL 7
 #define RR 8
-#define STOP 9   //停止不動
+#define LSWING 9
+#define RSWING 10
+#define LBSWING 11
+#define RBSWING 12
+#define STOP 13   //停止不動
 
 
 Ultrasonic ultrasonic_1(ULTRASONIC_1_TRIGGER_PIN, ULTRASONIC_1_ECHO_PIN);
@@ -41,6 +45,7 @@ Servo myServoRight;
 int pos = 0;    // variable to store the servo position 
 
 
+boolean isDelayFinish = false;
 
 void setup() 
 { 
@@ -63,20 +68,9 @@ int contCollision = 0;
 int ultraSonicThreshold = 4;
 void loop() 
 {  
-    RobotMove(0);
-    if((obstacleDistance(1) < ultraSonicThreshold) || obstacleDistance(2) < ultraSonicThreshold  || obstacleDistance(3) < ultraSonicThreshold){   //　少加了(contCollision % 2 == 0 ) 為什麼會左左
-        currDirection = BB;
-        RobotMove(2000);
-        currDirection = LL;
-        contCollision++;            
-        delay(10);
-    }else if((obstacleDistance(1) < ultraSonicThreshold) || obstacleDistance(2) < ultraSonicThreshold  || obstacleDistance(3) < ultraSonicThreshold
-                                      && (contCollision % 2 == 1 ) && (contCollision != 0)){
-        currDirection = BB;
-        RobotMove(2000);
-        currDirection = RR;
-        delay(10);        
-    }
+    RobotMove();
+    DetectAndHandleRobotCollideObstacle();
+
 //   myServoLeft.write(180);   // cw
 //   myServoRight.write(1);   // ccw
 // 
@@ -95,55 +89,256 @@ void loop()
 //    delay(15);                       // waits 15ms for the servo to reach the position 
 //  } 
 } 
-  int myServoLeftPos = 91;
-  int myServoRightPos = 90;
-void RobotMove(int delayTime){
+long previousTime = 0;
+int initialDetect = 0;
+boolean isLastSecondCollide = false;
+void DetectAndHandleRobotCollideObstacle(){
+	int t=0;
+	if(initialDetect>3){
+    if((obstacleDistance(1) < ultraSonicThreshold)
+    || (obstacleDistance(2) < ultraSonicThreshold)  
+    || (obstacleDistance(3) < ultraSonicThreshold)){   //　少加了(contCollision % 2 == 0 ) 為什麼會左左
+        Serial.println("detected!!!");
+        isLastSecondCollide = true;
+        isDelayFinish = false;
+//    	while(!isDelayFinish){
+//    		isDelayFinish = DelayHanlder(2000,BB); 
+//	}     	
+		t=0;
+		while(t<2000){
+			DecompositionAction(BB);
+			delay(1);			
+			t++;
+//			Serial.println(t);	
+		}
+        Serial.println("###move Back");                  
+        isDelayFinish = false;    
+//    	while(!isDelayFinish){
+//    		isDelayFinish = DelayHanlder(3400,LL); 
+//	} 	
+		t=0;
+		while(t<3400){
+			DecompositionAction(LL);
+			delay(1);			
+			t++;
+//			Serial.println(t);	
+		}
+        Serial.println("###move LEFT");                  
+        currDirection = FF;
+        contCollision++;            
+        delay(10);
+    }else if((obstacleDistance(1) < ultraSonicThreshold) 
+    	|| (obstacleDistance(2) < ultraSonicThreshold)  
+    	|| (obstacleDistance(3) < ultraSonicThreshold)
+        && (contCollision % 2 == 1 ) && (contCollision != 0)){
+		Serial.println("detected!!!");
+		isLastSecondCollide = true;
+        isDelayFinish = false;          
+//    	while(!isDelayFinish){
+//    		isDelayFinish = DelayHanlder(2000,BB); 
+		t=0;
+		while(t<2000){
+			DecompositionAction(BB);
+			delay(1);		
+			t++;		
+//			Serial.println(t);
+		}
+                Serial.println("###move Back");                  
+			
+//	}
+        isDelayFinish = false;    	
+//    	while(!isDelayFinish){
+//    		isDelayFinish = DelayHanlder(3400,RR); 
+//	} 	
+		t=0;
+		while(t<3400){
+			DecompositionAction(RR);
+			delay(1);			
+			t++;
+//			Serial.println(t);	
+		}
+        Serial.println("###move Right");                  
+        currDirection = FF;  
+        contCollision++;       
+        delay(10);        
+	}
+	}
+	initialDetect++;
+}
+boolean DelayHanlder(long interval,int DecompositionActionDirection){   
+  	unsigned long currentTime = millis();
+ 
+  // 檢查是否已超過間隔時間
+  // 是的話&#65292;就切換燈號並且記錄更新時間
+  	if(currentTime - previousTime > interval) {     // delay time is timeout
+		DecompositionAction(DecompositionActionDirection);
+	
+		previousTime = currentTime;
+		return true;		 
+	}	
+	
+	//can do another event: 
+	//we need to detect if the robot collide 
+	//the obstacle during swing left and right
+	DetectAndHandleRobotCollideObstacle();
+	return false;		 
+}
+int myServoLeftPos = 91;
+int myServoRightPos = 90;
+void DecompositionAction(int DecompositionActionDirection){
+  switch(DecompositionActionDirection){
+      case FF:
+        if(motorSpeed == 1){
+          myServoLeft.write(180);      
+          myServoRight.write(5); 
+          
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+          myServoLeft.write(100);      
+          myServoRight.write(82);        
+      
+        }                 
+      break;
+      case BB:
+        if(motorSpeed == 1){
+          myServoLeft.write(1);      
+          myServoRight.write(180); 
+        }else if(motorSpeed == 2){
 
+        }else if(motorSpeed == 3){
+          myServoLeft.write(80);      
+          myServoRight.write(100);       
+        }                    
+        break;
+      case RR:              
+        if(motorSpeed == 1){
+          myServoLeft.write(180);      
+          myServoRight.write(90);         
+//          delay(1900);   
+        }else if(motorSpeed == 2){
+
+        }else if(motorSpeed == 3){
+          myServoLeft.write(100);      
+          myServoRight.write(90);        
+//          delay(3400);          
+        } 
+//        currDirection = FF;
+        
+      break;
+      case LL:
+        if(motorSpeed == 1){
+          myServoLeft.write(91);      
+          myServoRight.write(1);         
+//          delay(1900);   
+        }else if(motorSpeed == 2){
+
+        }else if(motorSpeed == 3){
+          myServoLeft.write(91);      
+          myServoRight.write(80);        
+//          delay(3400);          
+        } 
+//        currDirection = FF;      
+      break;
+      case BR:
+      break;
+      case FR:
+      break;  
+      case FL:
+      break;  
+      case LSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(91);   //left swing   
+          myServoRight.write(80);        
+          Serial.println("###left swing");              	  
+		}    	        
+	  break;
+      case RSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(102);    //right swing  
+          myServoRight.write(90);  
+          Serial.println("###right swing");                         
+          
+        } 
+      break;      
+      case LBSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(91);      //left back swing   
+          myServoRight.write(100);              
+          Serial.println("###left back swing");                    
+        } 
+      break;      
+      case RBSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+          myServoLeft.write(80);      //right back swing  
+          myServoRight.write(90);        
+          Serial.println("###right back swing");                                                      
+        }              
+      break;
+      case STOP:
+        myServoLeft.write(91);      
+        myServoRight.write(90);                    
+      break; 
+  }      
+
+}
+
+void RobotMove(){
+  isDelayFinish = false;
   switch(currDirection){
       case FF:
         if(motorSpeed == 1){
           myServoLeft.write(180);      
-          myServoRight.write(5);      
+          myServoRight.write(5);  
+          Serial.println("move front");                 
         }else if(motorSpeed == 2){
           
         }else if(motorSpeed == 3){
           myServoLeft.write(100);      
           myServoRight.write(82);        
           Serial.println("move front");         
-        }    
-        delay(3000);          
-        if(motorSpeed == 1){
-               
-        }else if(motorSpeed == 2){
-          
-        }else if(motorSpeed == 3){
-          myServoLeft.write(91);   //left swing   
-          myServoRight.write(80);        
-          Serial.println("left swing");          
-          delay(2000);
-          myServoLeft.write(91);      //left back swing   
-          myServoRight.write(100);              
-          Serial.println("left back swing");                    
-          delay(2000);
-          myServoLeft.write(100);    //right swing  
-          myServoRight.write(90);  
-          Serial.println("right swing");                    
-          delay(2000);                
-          myServoLeft.write(80);      //right back swing  
-          myServoRight.write(90);        
-          Serial.println("right back swing");                              
-          delay(1500);                   
-        }        
+        }            
+    	while(!isDelayFinish){
+    		isDelayFinish = DelayHanlder(3000,FF); 
+    	}
+    	if(!isLastSecondCollide){
+        	currDirection = LSWING;         
+        
+    	}else{
+    		isLastSecondCollide = false;
+    	}
+
       break;
       case BB:
         if(motorSpeed == 1){
           myServoLeft.write(1);      
           myServoRight.write(180);      
+          Serial.println("move back"); 
         }else if(motorSpeed == 2){
 
         }else if(motorSpeed == 3){
-       //   myServoLeft.write(80);      
-       //   myServoRight.write(100);        
+          myServoLeft.write(80);      
+          myServoRight.write(100);  
+          Serial.println("move back");                  
         }                    
         break;
       case RR:              
@@ -152,13 +347,15 @@ void RobotMove(int delayTime){
           myServoLeft.write(180);      
           myServoRight.write(90);         
           delay(1900);   
+		  Serial.println("move right");           
         }else if(motorSpeed == 2){
 
 
         }else if(motorSpeed == 3){
           myServoLeft.write(100);      
           myServoRight.write(90);        
-          delay(3400);             
+          delay(3400);           
+		  Serial.println("move right");                       
         } 
         currDirection = FF;
         
@@ -168,13 +365,15 @@ void RobotMove(int delayTime){
           myServoLeft.write(91);      
           myServoRight.write(1);         
           delay(1900);   
+		  Serial.println("move left");                     
         }else if(motorSpeed == 2){
 
 
         }else if(motorSpeed == 3){
           myServoLeft.write(91);      
           myServoRight.write(80);        
-          delay(3400);             
+          delay(3400);            
+		  Serial.println("move left");                                
         } 
         currDirection = FF;      
       break;
@@ -184,13 +383,76 @@ void RobotMove(int delayTime){
       break;  
       case FL:
       break;  
+      case LSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(91);   //left swing   
+          myServoRight.write(80);        
+          Serial.println("left swing");              	  
+		}
+    	while(!isDelayFinish){
+    		isDelayFinish = DelayHanlder(2000,LSWING); 
+    	} 
+		        
+        currDirection = LBSWING;                
+      break;
+      case RSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(102);    //right swing  
+          myServoRight.write(90);  
+          Serial.println("right swing");                         
+          
+        } 
+    	while(!isDelayFinish){
+    		isDelayFinish = DelayHanlder(2000,RSWING); 
+    	}             
+    	currDirection = RBSWING;                    	
+      break;      
+      case LBSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+
+          myServoLeft.write(91);      //left back swing   
+          myServoRight.write(100);              
+          Serial.println("left back swing");                    
+        } 
+    	while(!isDelayFinish){
+    		isDelayFinish = DelayHanlder(2000,LBSWING); 
+    	}         
+		currDirection = RSWING;                    	
+      break;      
+      case RBSWING:
+        if(motorSpeed == 1){
+               
+        }else if(motorSpeed == 2){
+          
+        }else if(motorSpeed == 3){
+          myServoLeft.write(80);      //right back swing  
+          myServoRight.write(90);        
+          Serial.println("right back swing");                                                      
+        }              
+    	while(!isDelayFinish){
+    		isDelayFinish = DelayHanlder(1500,RBSWING); 
+    	} 
+    	currDirection = FF;                    	        
+      break;
       case STOP:
         myServoLeft.write(91);      
         myServoRight.write(90);                    
       break; 
   }      
-
-  delay(delayTime);
 }
 
 void CustomizeDiffSpeedChangeDirectionDelaySecond(){
@@ -215,7 +477,7 @@ float obstacleDistance(int ultrasonicNum){
       break;
       
   }
-  Serial.println(cmMsec);
+//  Serial.println(cmMsec);
   return cmMsec;
 }
 // callback for received data
