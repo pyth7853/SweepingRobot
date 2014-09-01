@@ -265,7 +265,7 @@ void DecompositionAction(int DecompositionActionDirection){
           
         }else if(motorSpeed == 3){
 
-          myServoLeft.write(102);    //right swing  
+          myServoLeft.write(103);    //right swing  
           myServoRight.write(90);  
           Serial.println("###right swing");                         
           
@@ -412,7 +412,7 @@ void RobotMove(){
           
         }else if(motorSpeed == 3){
 
-          myServoLeft.write(102);    //right swing  
+          myServoLeft.write(103);    //right swing  
           myServoRight.write(90);  
           Serial.println("right swing");                         
           
