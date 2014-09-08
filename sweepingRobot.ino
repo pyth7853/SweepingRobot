@@ -49,10 +49,14 @@ boolean isDelayFinish = false;
 
 void setup() 
 { 
-  // attaches the servo on pin 9 to the servo object 
-  myServoLeft.attach(2);
-  myServoRight.attach(3);  
+  	// attaches the servo on pin 9 to the servo object 
+  	myServoLeft.attach(2);
+  	myServoRight.attach(3);  
   
+        //set initial value, otherwise will always back first time  
+  	obstacleDistance(1);
+  	obstacleDistance(2);
+  	obstacleDistance(3);
     Serial.begin(9600);         // start serial for output
     // initialize i2c as slave
     Wire.begin(SLAVE_ADDRESS);
@@ -69,32 +73,11 @@ int ultraSonicThreshold = 4;
 void loop() 
 {  
     RobotMove();
-    DetectAndHandleRobotCollideObstacle();
-
-//   myServoLeft.write(180);   // cw
-//   myServoRight.write(1);   // ccw
-// 
-//   if(obstacleDistance(1) < 10){
-//   
-//   }
-// 
-//  for(pos = 0; pos < 180; pos += 1)  // goes from 0 degrees to 180 degrees 
-//  {                                  // in steps of 1 degree 
-//    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-//    delay(15);                       // waits 15ms for the servo to reach the position 
-//  } 
-//  for(pos = 180; pos>=1; pos-=1)     // goes from 180 degrees to 0 degrees 
-//  {                                
-//    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-//    delay(15);                       // waits 15ms for the servo to reach the position 
-//  } 
 } 
 long previousTime = 0;
-int initialDetect = 0;
 boolean isLastSecondCollide = false;
 void DetectAndHandleRobotCollideObstacle(){
 	int t=0;
-	if(initialDetect>3){
     if((obstacleDistance(1) < ultraSonicThreshold)
     || (obstacleDistance(2) < ultraSonicThreshold)  
     || (obstacleDistance(3) < ultraSonicThreshold)){   //　少加了(contCollision % 2 == 0 ) 為什麼會左左
@@ -162,14 +145,11 @@ void DetectAndHandleRobotCollideObstacle(){
         contCollision++;       
         delay(10);        
 	}
-	}
-	initialDetect++;
+	
 }
 boolean DelayHanlder(long interval,int DecompositionActionDirection){   
   	unsigned long currentTime = millis();
  
-  // 檢查是否已超過間隔時間
-  // 是的話&#65292;就切換燈號並且記錄更新時間
   	if(currentTime - previousTime > interval) {     // delay time is timeout
 		DecompositionAction(DecompositionActionDirection);
 	
@@ -395,7 +375,7 @@ void RobotMove(){
           Serial.println("left swing");              	  
 		}
     	while(!isDelayFinish){
-    		isDelayFinish = DelayHanlder(2000,LSWING); 
+    		isDelayFinish = DelayHanlder(600,LSWING); 
     	} 
     	if(!isLastSecondCollide){
         	currDirection = LBSWING;                       
@@ -418,7 +398,7 @@ void RobotMove(){
           
         } 
     	while(!isDelayFinish){
-    		isDelayFinish = DelayHanlder(2000,RSWING); 
+    		isDelayFinish = DelayHanlder(600,RSWING); 
     	} 
     	if(!isLastSecondCollide){
         	currDirection = RBSWING;                       
@@ -439,7 +419,7 @@ void RobotMove(){
           Serial.println("left back swing");                    
         } 
     	while(!isDelayFinish){
-    		isDelayFinish = DelayHanlder(2000,LBSWING); 
+    		isDelayFinish = DelayHanlder(600,LBSWING); 
     	}   
     	if(!isLastSecondCollide){
         	currDirection = RSWING;                       
@@ -459,7 +439,7 @@ void RobotMove(){
           Serial.println("right back swing");                                                      
         }              
     	while(!isDelayFinish){
-    		isDelayFinish = DelayHanlder(1500,RBSWING); 
+    		isDelayFinish = DelayHanlder(700,RBSWING); 
     	} 
     	if(!isLastSecondCollide){
         	currDirection = FF;                       
