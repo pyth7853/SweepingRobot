@@ -165,6 +165,7 @@ boolean DelayHanlder(long interval,int DecompositionActionDirection){
 }
 int myServoLeftPos = 91;
 int myServoRightPos = 90;
+int bonusSpeedCw = 10;
 void DecompositionAction(int DecompositionActionDirection){
   switch(DecompositionActionDirection){
       case FF:
@@ -175,8 +176,8 @@ void DecompositionAction(int DecompositionActionDirection){
         }else if(motorSpeed == 2){
           
         }else if(motorSpeed == 3){
-          myServoLeft.write(100);      
-          myServoRight.write(82);        
+          myServoLeft.write(100+bonusSpeedCw);      
+          myServoRight.write(82-bonusSpeedCw);        
       
         }                 
       break;
@@ -187,8 +188,8 @@ void DecompositionAction(int DecompositionActionDirection){
         }else if(motorSpeed == 2){
 
         }else if(motorSpeed == 3){
-          myServoLeft.write(80);      
-          myServoRight.write(100);       
+          myServoLeft.write(80-bonusSpeedCw);      
+          myServoRight.write(100+bonusSpeedCw);       
         }                    
         break;
       case RR:              
@@ -293,8 +294,8 @@ void RobotMove(){
         }else if(motorSpeed == 2){
           
         }else if(motorSpeed == 3){
-          myServoLeft.write(100);      
-          myServoRight.write(82);        
+          myServoLeft.write(100+bonusSpeedCw);      
+          myServoRight.write(82-bonusSpeedCw);        
           Serial.println("move front");         
         }            
     	while(!isDelayFinish){
@@ -316,8 +317,8 @@ void RobotMove(){
         }else if(motorSpeed == 2){
 
         }else if(motorSpeed == 3){
-          myServoLeft.write(80);      
-          myServoRight.write(100);  
+          myServoLeft.write(80-bonusSpeedCw);      
+          myServoRight.write(100+bonusSpeedCw);  
           Serial.println("move back");                  
         }                    
         break;
