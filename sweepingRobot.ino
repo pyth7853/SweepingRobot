@@ -440,7 +440,7 @@ void RobotMove(){
           Serial.println("right back swing");                                                      
         }              
     	while(!isDelayFinish){
-    		isDelayFinish = DelayHanlder(700,RBSWING); 
+    		isDelayFinish = DelayHanlder(600,RBSWING); 
     	} 
     	if(!isLastSecondCollide){
         	currDirection = FF;                       
